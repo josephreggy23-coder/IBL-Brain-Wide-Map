@@ -199,7 +199,13 @@ decision-geometry --force-stream
 
 # Run a smaller population or change temporal resolution
 decision-geometry --max-units 64 --bin-size 0.05
+
+# Record a different deterministic cross-validation split in the summary
+decision-geometry --seed 42
 ```
+
+The JSON summary records the selected `random_seed`, making the data-derived
+metrics and cross-validation split explicit when results are compared.
 
 ## Results at a glance
 

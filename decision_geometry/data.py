@@ -43,13 +43,27 @@ class PopulationDataset:
     session_id: str = SESSION_ID
 
     def __post_init__(self) -> None:
+        if self.rates.ndim != 3:
+            raise ValueError("rates must have shape trials x units x time")
         n_trials, n_units, n_bins = self.rates.shape
         if self.time.shape != (n_bins,):
             raise ValueError("time must match the last rates dimension")
-        if self.choice.shape != (n_trials,):
-            raise ValueError("trial labels must match the first rates dimension")
+        trial_fields = {
+            "choice": self.choice,
+            "stimulus_side": self.stimulus_side,
+            "prior_side": self.prior_side,
+            "contrast": self.contrast,
+            "rewarded": self.rewarded,
+            "reaction_time": self.reaction_time,
+            "trial_ids": self.trial_ids,
+        }
+        for name, values in trial_fields.items():
+            if values.shape != (n_trials,):
+                raise ValueError(f"{name} must match the first rates dimension")
         if self.unit_regions.shape != (n_units,):
             raise ValueError("unit metadata must match the second rates dimension")
+        if self.unit_ids.shape != (n_units,):
+            raise ValueError("unit_ids must match the second rates dimension")
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

@@ -36,3 +36,20 @@ def test_population_cache_round_trip(tmp_path: Path):
     restored = PopulationDataset.from_cache(path)
     np.testing.assert_array_equal(restored.rates, dataset.rates)
     assert str(restored.subject_id) == dataset.subject_id
+
+
+def test_population_dataset_rejects_misaligned_trial_metadata():
+    with np.testing.assert_raises_regex(ValueError, "contrast must match"):
+        PopulationDataset(
+            rates=np.ones((2, 1, 1), dtype=np.float32),
+            time=np.array([0.0]),
+            choice=np.array([0, 1]),
+            stimulus_side=np.array([0, 1]),
+            prior_side=np.array([0, 1]),
+            contrast=np.array([25.0]),
+            rewarded=np.array([True, False]),
+            reaction_time=np.array([0.2, 0.3]),
+            trial_ids=np.array([0, 1]),
+            unit_ids=np.array([0]),
+            unit_regions=np.array(["A"]),
+        )

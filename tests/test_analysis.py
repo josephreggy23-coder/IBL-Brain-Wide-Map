@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from decision_geometry.analysis import cross_temporal_decode, decode_timecourse
 
@@ -23,3 +24,15 @@ def test_cross_temporal_matrix_has_expected_shape_and_signal():
     scores = cross_temporal_decode(rates, labels)
     assert scores.shape == (8, 8)
     assert scores[4:, 4:].mean() > 0.85
+
+
+def test_decoder_rejects_misaligned_labels():
+    rates, _ = _decodable_fixture()
+    with pytest.raises(ValueError, match="match the trial count"):
+        decode_timecourse(rates, np.array([0, 1]))
+
+
+def test_decoder_rejects_an_unlabeled_dataset():
+    rates, _ = _decodable_fixture()
+    with pytest.raises(ValueError, match="non-negative label"):
+        cross_temporal_decode(rates, np.full(rates.shape[0], -1))

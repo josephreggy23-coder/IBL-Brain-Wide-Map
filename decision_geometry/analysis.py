@@ -39,6 +39,20 @@ def _classifier() -> object:
     )
 
 
+def _validated_decoding_inputs(
+    rates: np.ndarray, labels: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return valid observations after checking the decoder input contract."""
+    if rates.ndim != 3:
+        raise ValueError("rates must have shape trials x units x time")
+    if labels.ndim != 1 or labels.shape[0] != rates.shape[0]:
+        raise ValueError("labels must be one-dimensional and match the trial count")
+    valid = labels >= 0
+    if not np.any(valid):
+        raise ValueError("at least one non-negative label is required")
+    return rates[valid], labels[valid]
+
+
 def decode_timecourse(
     rates: np.ndarray,
     labels: np.ndarray,
@@ -46,9 +60,7 @@ def decode_timecourse(
     seed: int = 7,
 ) -> np.ndarray:
     """Return cross-validated balanced accuracy at every time bin."""
-    valid = labels >= 0
-    x = rates[valid]
-    y = labels[valid]
+    x, y = _validated_decoding_inputs(rates, labels)
     scores = np.zeros(x.shape[2], dtype=float)
     splits = _splits(y, seed)
     for time_index in range(x.shape[2]):
@@ -69,9 +81,7 @@ def cross_temporal_decode(
     seed: int = 7,
 ) -> np.ndarray:
     """Train at each time and test at every other time bin."""
-    valid = labels >= 0
-    x = rates[valid]
-    y = labels[valid]
+    x, y = _validated_decoding_inputs(rates, labels)
     splits = _splits(y, seed)
     n_bins = x.shape[2]
     scores = np.zeros((n_bins, n_bins), dtype=float)

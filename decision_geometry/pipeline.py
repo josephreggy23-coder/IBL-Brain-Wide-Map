@@ -19,6 +19,7 @@ def run_pipeline(
     force_stream: bool = False,
     bin_size: float = 0.05,
     max_units: int | None = 96,
+    seed: int = 7,
 ) -> dict:
     dataset = load_population(
         cache_path,
@@ -26,7 +27,7 @@ def run_pipeline(
         bin_size=bin_size,
         max_units=max_units,
     )
-    result = analyze_population(dataset)
+    result = analyze_population(dataset, seed=seed)
     output_dir = Path(output_dir)
     figure_path = save_dashboard(dataset, result, output_dir / "decision_geometry.png")
 
@@ -38,6 +39,7 @@ def run_pipeline(
         "n_trials": int(dataset.rates.shape[0]),
         "n_units": int(dataset.rates.shape[1]),
         "n_regions": int(np.unique(dataset.unit_regions).size),
+        "random_seed": seed,
         "quality_filter": "ibl_quality_score=1, presence_ratio>=0.9, 0.1<=firing_rate<=100 Hz",
         "peak_choice_accuracy": float(choice_scores.max()),
         "peak_choice_time_s": float(dataset.time[np.argmax(choice_scores)]),

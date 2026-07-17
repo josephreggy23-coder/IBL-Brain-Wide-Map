@@ -1,0 +1,18 @@
+{
+  "data": {
+    "dandiset": "000409",
+    "version": "0.260309.1324",
+    "asset_id": "882e2ff6-1fde-4518-8797-5d5892379739",
+    "subject_id": "NYU-39",
+    "session_id": "6ed57216-498d-48a6-b48b-a243a34710ea"
+  },
+  "n_trials": 541,
+  "n_units": 93,
+  "n_regions": 12,
+  "quality_filter": "ibl_quality_score=1, presence_ratio>=0.9, 0.1<=firing_rate<=100 Hz",
+  "peak_choice_accuracy": 0.8278622705037799,
+  "peak_choice_time_s": 0.2750000059604645,
+  "peak_stimulus_accuracy": 0.793162142501777,
+  "peak_prior_accuracy": 0.6963961038961038,
+  "figure": "results\\decision_geometry.png"
+}

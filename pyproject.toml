@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decision-geometry"
+version = "0.1.0"
+description = "Population-state analysis of real IBL Neuropixels decision-making data."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Jose"}]
+keywords = ["computational-neuroscience", "neuropixels", "NWB", "neural-decoding", "neural-manifolds"]
+dependencies = [
+  "h5py>=3.12",
+  "matplotlib>=3.9",
+  "numpy>=2.0",
+  "pynwb>=3.0",
+  "remfile>=0.1.13",
+  "requests>=2.32",
+  "scikit-learn>=1.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+decision-geometry = "decision_geometry.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["decision_geometry*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

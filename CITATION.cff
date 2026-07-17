@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this analysis, cite this repository and the IBL Brain Wide Map dataset."
+title: "Decision Geometry"
+type: software
+authors:
+  - family-names: "Jose"
+version: 0.1.0
+date-released: 2026-07-17
+license: MIT
+preferred-citation:
+  type: article
+  title: "A brain-wide map of neural activity during complex behaviour"
+  year: 2025
+  doi: "10.1038/s41586-025-09235-0"

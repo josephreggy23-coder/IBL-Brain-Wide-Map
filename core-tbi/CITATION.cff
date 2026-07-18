@@ -1,0 +1,6 @@
+cff-version: 1.2.0
+title: "CoRe-TBI: Counterfactual Recovery Modeling after Traumatic Brain Injury"
+message: "If you use CoRe-TBI, please cite this software and the source datasets."
+type: software
+license: MIT
+version: 0.1.0

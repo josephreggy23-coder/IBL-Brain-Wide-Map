@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "core-tbi"
+version = "0.1.0"
+description = "Counterfactual recovery modeling after traumatic brain injury"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "CoRe-TBI contributors"}]
+dependencies = ["numpy>=1.26", "pandas>=2.1", "scipy>=1.11", "scikit-learn>=1.4", "pydantic>=2.5", "PyYAML>=6", "typer>=0.12", "joblib>=1.3", "matplotlib>=3.8", "plotly>=5.18", "requests>=2.31", "openpyxl>=3.1"]
+
+[project.optional-dependencies]
+bayes = ["pymc>=5"]
+pose = ["torch>=2.2"]
+moseq = ["keypoint-moseq"]
+cebra = ["cebra"]
+dev = ["pytest>=8", "ruff>=0.4", "pre-commit>=3.6"]
+
+[project.scripts]
+core-tbi = "core_tbi.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

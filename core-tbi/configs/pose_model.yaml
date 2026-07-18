@@ -1,0 +1,4 @@
+extends: default.yaml
+likelihood_threshold: 0.9
+max_interpolation_gap: 5
+window_frames: 60

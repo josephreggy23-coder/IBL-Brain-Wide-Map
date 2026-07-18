@@ -1,0 +1,85 @@
+datasets:
+  alma:
+    purpose: Primary official open-data TBI proof-of-concept; inventory before analysis.
+    species: mouse
+    condition: moderate TBI, baseline, 1 day, 10 days
+    raw_video: unknown until inventory
+    pose_coordinates: unknown until inventory
+    calculated_features: figure-level source tables confirmed; participant-level format requires documented extraction
+    design: longitudinal
+    license: Verify Figshare record at download time
+    access: public download
+    url: https://doi.org/10.6084/m9.figshare.17212856.v1
+    doi: 10.6084/m9.figshare.17212856.v1
+    role: primary development dataset
+    limitations: The official workbook is organized as figure/source-data tables, not a confirmed ready-to-run per-animal pose table. It supports reproduction and inventory; animal-level PC-RSSM requires the original-level fields to be present or a separately supplied export. Published step-cycle analyses require animal-grouped validation.
+  stroke_dlc:
+    purpose: External neurological-injury validation.
+    species: rodent
+    condition: focal cerebral ischemia recovery
+    raw_video: unknown
+    pose_coordinates: sample data available
+    calculated_features: expected
+    design: longitudinal
+    license: Verify repository and Zenodo record
+    access: public download
+    url: https://github.com/rustlab1/DLC-Gait-Analysis
+    doi: 10.5281/zenodo.6499925
+    role: external validation only; never merge injury labels with TBI
+    limitations: Different injury biology and recording protocol.
+  diazepam_openfield:
+    purpose: Sedation control for speed-shortcut tests.
+    species: mouse
+    condition: saline or diazepam 1-3 mg/kg
+    raw_video: available
+    pose_coordinates: available
+    calculated_features: unknown
+    design: cross-sectional
+    license: Verify Zenodo record
+    access: public download (~2.1 GB)
+    url: https://zenodo.org/records/11235915
+    doi: null
+    role: pharmacological slowing control
+    limitations: Not an injury dataset.
+  yohimbine_openfield:
+    purpose: Arousal/anxiety control.
+    species: mouse
+    condition: saline or yohimbine
+    raw_video: available
+    pose_coordinates: available
+    calculated_features: unknown
+    design: cross-sectional
+    license: Verify Zenodo record
+    access: public download
+    url: https://zenodo.org/records/8188682
+    doi: null
+    role: contrasting non-injury control
+    limitations: Not a motor-recovery cohort.
+  odc_blast_homecage:
+    purpose: Chronic blast TBI tabular validation.
+    species: mouse
+    condition: blast or sham, 3 months
+    raw_video: unavailable
+    pose_coordinates: unavailable
+    calculated_features: available
+    design: cross-sectional
+    license: ODC-TBI terms
+    access: free account required
+    url: https://doi.org/10.34945/F5FK5C
+    doi: 10.34945/F5FK5C
+    role: feature-mode chronic validation
+    limitations: Derived endpoints, not frame-level pose.
+  odc_diffuse_tbi:
+    purpose: Conventional endpoint comparison.
+    species: mouse
+    condition: sham, single TBI, repetitive TBI
+    raw_video: unavailable
+    pose_coordinates: unavailable
+    calculated_features: available
+    design: longitudinal
+    license: ODC-TBI terms
+    access: free account required
+    url: https://doi.org/10.34945/F5BS3R
+    doi: 10.34945/F5BS3R
+    role: conventional endpoint comparison only
+    limitations: Must never be passed to pose encoder.

@@ -1,0 +1,5 @@
+seed: 7
+baseline_timepoint: baseline
+performance_feature: task_success
+min_baseline_observations: 3
+confidence_level: 0.95

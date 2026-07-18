@@ -1,0 +1,5 @@
+extends: default.yaml
+features: [stride_length, step_height, swing_duration, asymmetry, joint_angle_range, velocity]
+group_by: animal_id
+n_splits: 5
+seed: 7

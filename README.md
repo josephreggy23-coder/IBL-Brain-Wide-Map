@@ -6,6 +6,7 @@
 [![Data: DANDI 000409](https://img.shields.io/badge/Data-DANDI%20000409-146C94)](https://dandiarchive.org/dandiset/000409)
 [![Format: NWB](https://img.shields.io/badge/Format-NWB-4C956C)](https://www.nwb.org/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-2F2F2F)](LICENSE)
+[![Live explorer](https://img.shields.io/badge/Live-Interactive%20explorer-0878B7)](https://decision-geometry-ibl.joseph-titus.chatgpt.site)
 
 How do **sensory evidence**, an animal's **learned prior**, and its eventual
 **choice** emerge in the activity of many neurons at once? Decision Geometry
@@ -16,6 +17,8 @@ The pipeline streams real spike trains and behavior from DANDI, aligns neural
 activity to each decision, and asks not only *whether* task information is
 decodable, but also *when it appears*, *how stable its neural representation is*,
 and *which recorded regions contain it*.
+
+**[Launch the interactive Decision Geometry explorer](https://decision-geometry-ibl.joseph-titus.chatgpt.site)** to scrub through time and switch between information, code-stability, and regional views.
 
 ## Main result
 

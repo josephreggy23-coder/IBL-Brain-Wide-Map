@@ -40,6 +40,8 @@ def run_pipeline(
         "n_units": int(dataset.rates.shape[1]),
         "n_regions": int(np.unique(dataset.unit_regions).size),
         "random_seed": seed,
+        "bin_size_s": bin_size,
+        "max_units_requested": max_units,
         "quality_filter": "ibl_quality_score=1, presence_ratio>=0.9, 0.1<=firing_rate<=100 Hz",
         "peak_choice_accuracy": float(choice_scores.max()),
         "peak_choice_time_s": float(dataset.time[np.argmax(choice_scores)]),

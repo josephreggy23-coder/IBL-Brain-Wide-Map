@@ -17,6 +17,18 @@ def test_quality_filter_selects_only_stable_units():
     np.testing.assert_array_equal(selected, [0])
 
 
+def test_quality_filter_rejects_non_positive_unit_limit():
+    with np.testing.assert_raises_regex(ValueError, "max_units"):
+        select_unit_indices(
+            quality=np.array([1.0]),
+            presence_ratio=np.array([1.0]),
+            firing_rate=np.array([1.0]),
+            max_electrode=np.array([0]),
+            n_electrodes=1,
+            max_units=0,
+        )
+
+
 def test_population_cache_round_trip(tmp_path: Path):
     dataset = PopulationDataset(
         rates=np.ones((4, 3, 2), dtype=np.float32),

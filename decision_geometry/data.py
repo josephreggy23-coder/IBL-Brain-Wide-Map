@@ -115,6 +115,8 @@ def select_unit_indices(
     max_units: int | None,
 ) -> np.ndarray:
     """Select stable, well-isolated units using documented IBL metrics."""
+    if max_units is not None and max_units < 1:
+        raise ValueError("max_units must be at least one or None")
     mask = (
         (quality >= 1.0)
         & (presence_ratio >= 0.9)

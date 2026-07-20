@@ -211,6 +211,10 @@ The JSON summary records the selected `random_seed`, `bin_size_s`, and
 `max_units_requested`, making the data-derived metrics and analysis settings
 explicit when results are compared.
 
+`--max-units` must be a positive integer. When a limit is requested, eligible
+units are ranked by presence ratio and firing rate before the top units are
+used, so smaller exploratory runs remain deterministic.
+
 ## Results at a glance
 
 | Measurement | Result |

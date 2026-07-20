@@ -207,8 +207,9 @@ decision-geometry --max-units 64 --bin-size 0.05
 decision-geometry --seed 42
 ```
 
-The JSON summary records the selected `random_seed`, making the data-derived
-metrics and cross-validation split explicit when results are compared.
+The JSON summary records the selected `random_seed`, `bin_size_s`, and
+`max_units_requested`, making the data-derived metrics and analysis settings
+explicit when results are compared.
 
 ## Results at a glance
 

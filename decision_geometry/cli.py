@@ -8,6 +8,20 @@ import json
 from .pipeline import run_pipeline
 
 
+def positive_float(value: str) -> float:
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed
+
+
+def positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be at least one")
+    return parsed
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze decision geometry in a public IBL Neuropixels session."
@@ -15,8 +29,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cache", default="data/cache/session_population.npz")
     parser.add_argument("--output-dir", default="results")
     parser.add_argument("--force-stream", action="store_true")
-    parser.add_argument("--bin-size", type=float, default=0.05)
-    parser.add_argument("--max-units", type=int, default=96)
+    parser.add_argument("--bin-size", type=positive_float, default=0.05)
+    parser.add_argument("--max-units", type=positive_int, default=96)
     parser.add_argument("--seed", type=int, default=7, help="Random seed for cross-validation splits.")
     return parser
 

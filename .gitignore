@@ -5,3 +5,11 @@ __pycache__/
 *.egg-info/
 .coverage
 data/
+
+# Separate projects that may share this local workspace.
+cadence/
+core-tbi/
+keystone/
+Latent-Period-Epileptogenesis-Assessment-Via-Markov-Modeling/
+neurocircuit_lab/
+profile-readme/

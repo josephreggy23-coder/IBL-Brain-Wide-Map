@@ -1,3 +1,0 @@
-extends: feature_model.yaml
-n_animals_per_condition: 12
-sessions_per_timepoint: 3

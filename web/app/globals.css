@@ -91,6 +91,7 @@ h1 { margin: 0; max-width: 820px; font-size: 54px; line-height: 1.03; font-weigh
 .event-light { stroke: rgba(255, 255, 255, 0.8); stroke-width: 1; }
 .selection-line { stroke: #1c2023; stroke-width: 1.2; stroke-dasharray: 3 3; }
 .matrix-selection { fill: none; stroke: #ffffff; stroke-width: 1.5; pointer-events: none; }
+.confidence-band { opacity: 0.13; pointer-events: none; }
 .data-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .axis-label, .matrix-edge-label { fill: #5d6469; font-size: 12px; }
 .axis-title { fill: #30363a; font-size: 12px; font-weight: 600; }
@@ -103,8 +104,9 @@ h1 { margin: 0; max-width: 820px; font-size: 54px; line-height: 1.03; font-weigh
 .readout { padding: 26px 22px; }
 .readout-time { margin: 0 0 22px; font-family: var(--font-geist-mono), monospace; font-size: 21px; }
 .readout-row { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
-.readout-row span { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.readout-row span { display: grid; grid-template-columns: 9px 1fr; align-items: center; gap: 2px 8px; color: var(--muted); }
 .readout-row i { width: 9px; height: 9px; border-radius: 50%; }
+.readout-row small { grid-column: 2; color: #7a8185; font-size: 10px; }
 .readout-rule { height: 1px; background: var(--line-strong); margin: 26px 0; }
 .readout-label { margin: 0 0 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; }
 .region-name { display: block; font-size: 17px; line-height: 1.35; }
@@ -127,6 +129,8 @@ h1 { margin: 0; max-width: 820px; font-size: 54px; line-height: 1.03; font-weigh
 .source dt { color: var(--muted); }
 .source dd { margin: 0; font-family: var(--font-geist-mono), monospace; font-size: 13px; overflow-wrap: anywhere; }
 .source dd a { color: var(--cyan); }
+.source-details { min-width: 0; }
+.receipt-link { display: inline-block; margin-top: 18px; color: var(--cyan); font-size: 14px; font-weight: 600; }
 footer { padding: 24px max(32px, calc((100% - 1320px) / 2)); display: flex; justify-content: space-between; gap: 24px; align-items: center; border-top: 1px solid var(--line-strong); background: var(--foreground); color: #ffffff; font-size: 13px; }
 footer span { font-weight: 650; }
 footer p { margin: 0; color: #c9cecb; }

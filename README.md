@@ -38,9 +38,11 @@ mark its end at `+1.0 s`.
 
 **B. Information over time.** Cross-validated logistic decoders estimate how
 well a linear readout can recover stimulus side, block prior, or choice from one
-50 ms population snapshot. Chance is `0.5`. Choice peaks at **82.8% balanced
-accuracy around 275 ms after stimulus onset**, stimulus side reaches **79.3%**,
-and block prior reaches **69.6%**.
+50 ms population snapshot. Shaded bands are 95% class-stratified bootstrap
+intervals computed from held-out predictions. Chance is `0.5`. Choice peaks at
+**82.8% balanced accuracy around 275 ms after stimulus onset** with a
+**79.5%-86.1% interval at that time**; stimulus side reaches **79.3%**, and
+block prior reaches **69.6%**.
 
 **C. Cross-temporal choice decoding.** A decoder is trained at every time point
 and tested at every other time point. The bright post-stimulus band shows that
@@ -79,13 +81,16 @@ Decision Geometry bridges that gap by providing:
 - **Practical access:** HTTP byte-range streaming reads only the required NWB
   slices instead of downloading the whole recording.
 - **Reproducible preprocessing:** explicit IBL unit-quality thresholds and a
-  cached trial-by-unit-by-time tensor.
+  cached trial-by-unit-by-time tensor whose source and analysis parameters are
+  validated before reuse.
 - **Population-level interpretation:** PCA trajectories connect individual
   spikes to low-dimensional neural dynamics.
 - **Temporal tests:** time-resolved and cross-temporal decoding distinguish
   information strength from representational stability.
 - **Anatomical comparison:** the same analysis is repeated across recorded
   regions using one consistent evaluation procedure.
+- **Uncertainty reporting:** held-out predictions are resampled within each
+  class to provide deterministic 95% intervals around the main decoding curves.
 
 This is the useful middle ground between a basic dataset-loading tutorial and a
 full consortium-scale reanalysis.
@@ -170,6 +175,8 @@ never committed to Git.
 - **PCA** standardizes unit activity and estimates low-dimensional trajectories.
 - **Time-resolved decoding** uses five-fold stratified cross-validation and
   balanced accuracy to decode stimulus side, prior, and choice independently.
+- **Uncertainty intervals** use 1,000 class-stratified bootstrap resamples of
+  out-of-fold predictions at each time bin.
 - **Cross-temporal decoding** trains at one time bin and tests at all bins,
   producing a train-time by test-time stability matrix.
 - **Regional decoding** repeats choice decoding for anatomical regions with at
@@ -191,8 +198,11 @@ decision-geometry
 pytest
 ```
 
-The first run creates `data/cache/session_population.npz`. Later runs reuse that
-cache and write the dashboard plus `results/summary.json`.
+The first run creates `data/cache/session_population.npz`. The cache records its
+DANDI asset, published version, time window, bin size, and unit limit. Later runs
+reuse it only when all of those values match; a changed analysis request rebuilds
+the tensor instead of silently returning stale data. Results are written to the
+dashboard and `results/summary.json`.
 
 Useful options:
 
@@ -224,6 +234,7 @@ used, so smaller exploratory runs remain deterministic.
 | Anatomical regions represented | 12 |
 | Peak choice balanced accuracy | 82.8% |
 | Peak choice time | 275 ms after stimulus onset |
+| Choice 95% interval at peak time | 79.5%-86.1% |
 | Peak stimulus-side balanced accuracy | 79.3% |
 | Peak block-prior balanced accuracy | 69.6% |
 
@@ -235,7 +246,9 @@ Exact machine-readable values are stored in
 Above-chance decoding means that a linear model can read information from the
 recorded population. It does **not** establish that a region causes the choice.
 Likewise, PCA is a descriptive projection rather than a mechanistic model of the
-circuit.
+circuit. The interval reported at the peak time quantifies trial-sampling
+uncertainty at that selected bin; it is not a correction for searching across
+time and should not be read as a confirmatory significance test.
 
 This repository analyzes one session to provide a transparent, runnable example.
 A research claim about the full IBL population would require held-out sessions,
@@ -252,11 +265,18 @@ decision_geometry/
   plotting.py    four-panel scientific result figure
   pipeline.py    end-to-end orchestration and summary export
   cli.py         command-line interface
+scripts/
+  export_web_payload.py  exact analysis-to-explorer data export
 results/
   decision_geometry.png
   summary.json
-tests/           deterministic tests for filtering, caching, and decoding
+tests/           deterministic tests for filtering, cache integrity, and decoding
+web/             interactive explorer and downloadable analysis receipt
 ```
+
+This repository is intentionally scoped to Decision Geometry. Other experiments,
+personal profile repositories, and unrelated literature downloads are not part
+of `main`.
 
 ## References and attribution
 

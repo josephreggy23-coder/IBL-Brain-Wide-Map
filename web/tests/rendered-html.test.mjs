@@ -40,6 +40,7 @@ test("ships exact analysis data and visual assets", async () => {
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     access(new URL("../public/decision-geometry.png", import.meta.url)),
     access(new URL("../public/og.png", import.meta.url)),
+    access(new URL("../public/analysis-receipt.json", import.meta.url)),
   ]);
   const payload = JSON.parse(payloadText);
 
@@ -47,6 +48,8 @@ test("ships exact analysis data and visual assets", async () => {
   assert.equal(payload.summary.units, 93);
   assert.equal(payload.time.length, 30);
   assert.equal(payload.crossTemporalChoice.length, 30);
+  assert.equal(payload.decodingCi.choice.length, 2);
+  assert.equal(payload.analysis.bootstrapResamples, 1000);
   assert.ok(Object.keys(payload.regionDecoding).length >= 5);
   assert.match(page, /type Panel = "decoding" \| "stability" \| "regions"/);
   assert.match(page, /id="time-scrubber"/);

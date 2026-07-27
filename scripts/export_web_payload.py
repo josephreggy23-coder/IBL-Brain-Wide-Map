@@ -8,6 +8,11 @@ from pathlib import Path
 import numpy as np
 
 from decision_geometry.analysis import analyze_population
+from decision_geometry.config import (
+    DEFAULT_BIN_SIZE,
+    DEFAULT_MAX_UNITS,
+    DEFAULT_WINDOW,
+)
 from decision_geometry.data import PopulationDataset, provenance
 
 
@@ -22,14 +27,28 @@ def main() -> None:
 
     dataset = PopulationDataset.from_cache(cache_path)
     result = analyze_population(dataset)
+    peak_choice_index = int(np.argmax(result.decoding["choice"]))
     payload = {
         "provenance": provenance(),
+        "analysis": {
+            "randomSeed": 7,
+            "binSizeSeconds": DEFAULT_BIN_SIZE,
+            "windowSeconds": list(DEFAULT_WINDOW),
+            "maxUnitsRequested": DEFAULT_MAX_UNITS,
+            "crossValidationFolds": 5,
+            "bootstrapResamples": 1000,
+            "metric": "balanced accuracy",
+            "classifier": "standardized class-balanced logistic regression (C=1.0)",
+        },
         "summary": {
             "trials": int(dataset.rates.shape[0]),
             "units": int(dataset.rates.shape[1]),
             "regions": int(np.unique(dataset.unit_regions).size),
             "peakChoiceAccuracy": float(result.decoding["choice"].max()),
-            "peakChoiceTime": float(dataset.time[np.argmax(result.decoding["choice"])]),
+            "peakChoiceTime": float(dataset.time[peak_choice_index]),
+            "peakChoiceCi95": _rounded(
+                result.decoding_ci["choice"][:, peak_choice_index]
+            ),
         },
         "time": _rounded(dataset.time),
         "decoding": {
@@ -50,10 +69,19 @@ def main() -> None:
         "explainedVariance": _rounded(result.explained_variance),
     }
 
-    output_path = Path("web/app/analysis-data.json")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
-    print(f"Wrote {output_path}")
+    app_path = Path("web/app/analysis-data.json")
+    receipt_path = Path("web/public/analysis-receipt.json")
+    app_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    app_path.write_text(
+        json.dumps(payload, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    receipt_path.write_text(
+        json.dumps(payload, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"Wrote {app_path} and {receipt_path}")
 
 
 if __name__ == "__main__":

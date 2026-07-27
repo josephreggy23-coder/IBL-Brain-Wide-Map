@@ -40,6 +40,19 @@ function linePath(values: number[]) {
     .join(" ");
 }
 
+function areaPath(low: number[], high: number[]) {
+  const upper = high.map((value, index) =>
+    `${index === 0 ? "M" : "L"}${xScale(data.time[index]).toFixed(1)},${yScale(value).toFixed(1)}`,
+  );
+  const lower = low
+    .map((value, index) => [value, index] as const)
+    .reverse()
+    .map(([value, index]) =>
+      `L${xScale(data.time[index]).toFixed(1)},${yScale(value).toFixed(1)}`,
+    );
+  return [...upper, ...lower, "Z"].join(" ");
+}
+
 function heatColor(value: number, palette: "magma" | "viridis") {
   const t = Math.max(0, Math.min(1, (value - 0.45) / 0.4));
   if (palette === "magma") {
@@ -74,6 +87,11 @@ function DecodingChart({ selectedIndex }: { selectedIndex: number }) {
       <line className="selection-line" x1={xScale(data.time[selectedIndex])} x2={xScale(data.time[selectedIndex])} y1={margin.top} y2={height - margin.bottom} />
       {series.map((item) => (
         <g key={item.key}>
+          <path
+            className="confidence-band"
+            d={areaPath(data.decodingCi[item.key][0], data.decodingCi[item.key][1])}
+            fill={item.color}
+          />
           <path className="data-line" d={linePath(data.decoding[item.key])} stroke={item.color} />
           <circle cx={xScale(data.time[selectedIndex])} cy={yScale(data.decoding[item.key][selectedIndex])} r="5" fill={item.color} stroke="#ffffff" strokeWidth="2" />
         </g>
@@ -130,7 +148,7 @@ function RegionChart({ selectedIndex }: { selectedIndex: number }) {
   return (
     <svg className="chart region-chart" viewBox={`0 0 ${chartWidth} ${height}`} role="img" aria-labelledby="region-title region-desc">
       <title id="region-title">Choice information by anatomical region</title>
-      <desc id="region-desc">Balanced choice-decoding accuracy over time for five regions with at least five retained units.</desc>
+      <desc id="region-desc">Balanced choice-decoding accuracy over time for {regions.length} regions with at least five retained units.</desc>
       {regions.map(([name, values], rowIndex) => (
         <g key={name}>
           <text className="region-label" x={left - 14} y={top + rowIndex * cellHeight + cellHeight / 2 + 4} textAnchor="end">{name}</text>
@@ -197,7 +215,7 @@ export default function Home() {
         <article className="metric-card"><span>Valid trials</span><strong>{data.summary.trials}</strong><small>visual decisions</small></article>
         <article className="metric-card"><span>Retained units</span><strong>{data.summary.units}</strong><small>strict IBL quality filter</small></article>
         <article className="metric-card"><span>Regions</span><strong>{data.summary.regions}</strong><small>anatomical labels</small></article>
-        <article className="metric-card accent-card"><span>Peak choice readout</span><strong>{(data.summary.peakChoiceAccuracy * 100).toFixed(1)}%</strong><small>at {Math.round(data.summary.peakChoiceTime * 1000)} ms</small></article>
+        <article className="metric-card accent-card"><span>Peak choice readout</span><strong>{(data.summary.peakChoiceAccuracy * 100).toFixed(1)}%</strong><small>at {Math.round(data.summary.peakChoiceTime * 1000)} ms | 95% CI {(data.summary.peakChoiceCi95[0] * 100).toFixed(1)}-{(data.summary.peakChoiceCi95[1] * 100).toFixed(1)}%</small></article>
       </section>
 
       <section className="explorer" id="explorer">
@@ -226,14 +244,14 @@ export default function Home() {
             <p className="readout-time">t = {selectedTime >= 0 ? "+" : ""}{selectedTime.toFixed(3)} s</p>
             {series.map((item) => (
               <div className="readout-row" key={item.key}>
-                <span><i style={{ background: item.color }} />{item.label}</span>
+                <span><i style={{ background: item.color }} />{item.label}<small>95% CI {(data.decodingCi[item.key][0][selectedIndex] * 100).toFixed(1)}-{(data.decodingCi[item.key][1][selectedIndex] * 100).toFixed(1)}</small></span>
                 <strong>{(data.decoding[item.key][selectedIndex] * 100).toFixed(1)}%</strong>
               </div>
             ))}
             <div className="readout-rule" />
             <p className="readout-label">Strongest region now</p>
             <strong className="region-name">{strongestRegion[0].replace(/ \(n=\d+\)/, "")}</strong>
-            <p className="readout-note">{(strongestRegion[1][selectedIndex] * 100).toFixed(1)}% balanced choice accuracy. Above 50% means a linear model reads choice information better than chance.</p>
+            <p className="readout-note">{(strongestRegion[1][selectedIndex] * 100).toFixed(1)}% balanced choice accuracy. Above 50% means a linear model reads choice information better than chance. Bands show uncertainty from held-out trial predictions.</p>
           </aside>
         </div>
       </section>
@@ -245,7 +263,7 @@ export default function Home() {
           <li><span>02</span><strong>Filter</strong><p>Keep units passing all IBL quality metrics and presence thresholds.</p></li>
           <li><span>03</span><strong>Align</strong><p>Bin spikes in 50 ms windows around visual stimulus onset.</p></li>
           <li><span>04</span><strong>Decode</strong><p>Use stratified cross-validation for stimulus, prior, and choice.</p></li>
-          <li><span>05</span><strong>Compare</strong><p>Measure low-dimensional trajectories, temporal stability, and regions.</p></li>
+          <li><span>05</span><strong>Quantify</strong><p>Bootstrap held-out predictions for deterministic 95% uncertainty intervals.</p></li>
         </ol>
       </section>
 
@@ -256,12 +274,15 @@ export default function Home() {
 
       <section className="source" id="source">
         <div><p className="eyebrow">Data provenance</p><h2>Public, pinned, and inspectable.</h2><p>The source is one published session from the International Brain Laboratory Brain Wide Map. The explorer uses exact derived values from the repository analysis; the raw recording remains on DANDI.</p></div>
-        <dl>
-          <div><dt>Dandiset</dt><dd><a href="https://dandiarchive.org/dandiset/000409">000409</a></dd></div>
-          <div><dt>Version</dt><dd>0.260309.1324</dd></div>
-          <div><dt>Asset</dt><dd>882e2ff6-1fde-4518-8797-5d5892379739</dd></div>
-          <div><dt>Format</dt><dd>Neurodata Without Borders</dd></div>
-        </dl>
+        <div className="source-details">
+          <dl>
+            <div><dt>Dandiset</dt><dd><a href="https://dandiarchive.org/dandiset/000409">000409</a></dd></div>
+            <div><dt>Version</dt><dd>{data.provenance.version}</dd></div>
+            <div><dt>Asset</dt><dd>{data.provenance.asset_id}</dd></div>
+            <div><dt>Analysis</dt><dd>{data.analysis.crossValidationFolds}-fold CV / {data.analysis.bootstrapResamples} bootstraps</dd></div>
+          </dl>
+          <a className="receipt-link" href="/analysis-receipt.json" download>Download analysis receipt</a>
+        </div>
       </section>
 
       <footer><span>Decision Geometry</span><p>Real neural data. Reproducible computation. Careful claims.</p><a href="https://github.com/josephreggy23-coder/IBL-Brain-Wide-Map">Source code</a></footer>

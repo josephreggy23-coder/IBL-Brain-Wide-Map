@@ -64,6 +64,15 @@ def save_dashboard(
 
     ax = fig.add_subplot(grid[0, 1])
     for name in ("stimulus", "prior", "choice"):
+        interval = result.decoding_ci[name]
+        ax.fill_between(
+            dataset.time,
+            interval[0],
+            interval[1],
+            color=COLORS[name],
+            alpha=0.13,
+            linewidth=0,
+        )
         ax.plot(dataset.time, result.decoding[name], color=COLORS[name], linewidth=2, label=name)
     ax.axhline(0.5, color="#777777", linewidth=1, linestyle="--")
     ax.axvline(0.0, color="#222222", linewidth=1)
@@ -72,6 +81,14 @@ def save_dashboard(
     ax.set_xlabel("time from stimulus onset (s)")
     ax.set_ylabel("cross-validated balanced accuracy")
     ax.legend(frameon=False, ncol=3)
+    ax.text(
+        0.99,
+        0.03,
+        "bands: 95% stratified bootstrap CI",
+        transform=ax.transAxes,
+        color="#555555",
+        ha="right",
+    )
 
     ax = fig.add_subplot(grid[1, 0])
     image = ax.imshow(

@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
 
-from decision_geometry.analysis import cross_temporal_decode, decode_timecourse
+from decision_geometry.analysis import (
+    cross_temporal_decode,
+    decode_timecourse,
+    decode_timecourse_estimate,
+)
 
 
 def _decodable_fixture(seed=3):
@@ -17,6 +21,24 @@ def test_timecourse_detects_post_signal():
     scores = decode_timecourse(rates, labels)
     assert scores[4:].mean() > 0.85
     assert scores[:4].mean() < 0.7
+
+
+def test_timecourse_uncertainty_is_deterministic_and_tracks_signal():
+    rates, labels = _decodable_fixture()
+    first = decode_timecourse_estimate(rates, labels, n_resamples=200)
+    second = decode_timecourse_estimate(rates, labels, n_resamples=200)
+
+    np.testing.assert_array_equal(first.ci_low, second.ci_low)
+    np.testing.assert_array_equal(first.ci_high, second.ci_high)
+    assert first.ci_low.shape == first.scores.shape
+    assert np.all(first.ci_low <= first.ci_high)
+    assert first.ci_low[4:].mean() > 0.75
+
+
+def test_timecourse_uncertainty_rejects_too_few_resamples():
+    rates, labels = _decodable_fixture()
+    with pytest.raises(ValueError, match="at least 10"):
+        decode_timecourse_estimate(rates, labels, n_resamples=9)
 
 
 def test_cross_temporal_matrix_has_expected_shape_and_signal():

@@ -20,8 +20,16 @@ class AnalysisResult:
     pca_trajectories: dict[str, np.ndarray]
     explained_variance: np.ndarray
     decoding: dict[str, np.ndarray]
+    decoding_ci: dict[str, np.ndarray]
     cross_temporal_choice: np.ndarray
     region_decoding: dict[str, np.ndarray]
+
+
+@dataclass(frozen=True)
+class DecodingEstimate:
+    scores: np.ndarray
+    ci_low: np.ndarray
+    ci_high: np.ndarray
 
 
 def _splits(labels: np.ndarray, seed: int, n_splits: int = 5):
@@ -53,15 +61,15 @@ def _validated_decoding_inputs(
     return rates[valid], labels[valid]
 
 
-def decode_timecourse(
+def _decode_timecourse_oof(
     rates: np.ndarray,
     labels: np.ndarray,
     *,
-    seed: int = 7,
-) -> np.ndarray:
-    """Return cross-validated balanced accuracy at every time bin."""
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     x, y = _validated_decoding_inputs(rates, labels)
     scores = np.zeros(x.shape[2], dtype=float)
+    predictions = np.empty((x.shape[0], x.shape[2]), dtype=y.dtype)
     splits = _splits(y, seed)
     for time_index in range(x.shape[2]):
         fold_scores = []
@@ -69,9 +77,65 @@ def decode_timecourse(
             model = _classifier()
             model.fit(x[train, :, time_index], y[train])
             prediction = model.predict(x[test, :, time_index])
+            predictions[test, time_index] = prediction
             fold_scores.append(balanced_accuracy_score(y[test], prediction))
         scores[time_index] = np.mean(fold_scores)
+    return y, scores, predictions
+
+
+def _bootstrap_balanced_accuracy(
+    labels: np.ndarray,
+    predictions: np.ndarray,
+    *,
+    seed: int,
+    n_resamples: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    if n_resamples < 10:
+        raise ValueError("n_resamples must be at least 10")
+
+    classes = np.unique(labels)
+    bootstrap_scores = np.zeros((n_resamples, predictions.shape[1]), dtype=float)
+    rng = np.random.default_rng(seed)
+    for label in classes:
+        class_indices = np.flatnonzero(labels == label)
+        sampled = rng.choice(
+            class_indices,
+            size=(n_resamples, class_indices.size),
+            replace=True,
+        )
+        bootstrap_scores += (predictions[sampled] == label).mean(axis=1)
+    bootstrap_scores /= classes.size
+    low, high = np.quantile(bootstrap_scores, [0.025, 0.975], axis=0)
+    return low, high
+
+
+def decode_timecourse(
+    rates: np.ndarray,
+    labels: np.ndarray,
+    *,
+    seed: int = 7,
+) -> np.ndarray:
+    """Return cross-validated balanced accuracy at every time bin."""
+    _, scores, _ = _decode_timecourse_oof(rates, labels, seed=seed)
     return scores
+
+
+def decode_timecourse_estimate(
+    rates: np.ndarray,
+    labels: np.ndarray,
+    *,
+    seed: int = 7,
+    n_resamples: int = 1000,
+) -> DecodingEstimate:
+    """Return time-resolved accuracy with a stratified bootstrap interval."""
+    y, scores, predictions = _decode_timecourse_oof(rates, labels, seed=seed)
+    low, high = _bootstrap_balanced_accuracy(
+        y,
+        predictions,
+        seed=seed + 10_000,
+        n_resamples=n_resamples,
+    )
+    return DecodingEstimate(scores=scores, ci_low=low, ci_high=high)
 
 
 def cross_temporal_decode(
@@ -118,13 +182,28 @@ def analyze_population(
     *,
     seed: int = 7,
     min_region_units: int = 5,
+    bootstrap_resamples: int = 1000,
 ) -> AnalysisResult:
     rates = dataset.rates.astype(float)
     trajectories, explained = _pca_trajectories(dataset.rates, dataset.choice)
-    decoding = {
-        "choice": decode_timecourse(rates, dataset.choice, seed=seed),
-        "stimulus": decode_timecourse(rates, dataset.stimulus_side, seed=seed),
-        "prior": decode_timecourse(rates, dataset.prior_side, seed=seed),
+    labels = {
+        "choice": dataset.choice,
+        "stimulus": dataset.stimulus_side,
+        "prior": dataset.prior_side,
+    }
+    estimates = {
+        name: decode_timecourse_estimate(
+            rates,
+            values,
+            seed=seed,
+            n_resamples=bootstrap_resamples,
+        )
+        for name, values in labels.items()
+    }
+    decoding = {name: estimate.scores for name, estimate in estimates.items()}
+    decoding_ci = {
+        name: np.vstack((estimate.ci_low, estimate.ci_high))
+        for name, estimate in estimates.items()
     }
     cross_temporal = cross_temporal_decode(rates, dataset.choice, seed=seed)
 
@@ -141,6 +220,7 @@ def analyze_population(
         pca_trajectories=trajectories,
         explained_variance=explained,
         decoding=decoding,
+        decoding_ci=decoding_ci,
         cross_temporal_choice=cross_temporal,
         region_decoding=region_decoding,
     )

@@ -34,6 +34,8 @@ def run_pipeline(
     choice_scores = result.decoding["choice"]
     stimulus_scores = result.decoding["stimulus"]
     prior_scores = result.decoding["prior"]
+    peak_choice_index = int(np.argmax(choice_scores))
+    peak_choice_ci = result.decoding_ci["choice"][:, peak_choice_index]
     summary = {
         "data": provenance(),
         "n_trials": int(dataset.rates.shape[0]),
@@ -42,9 +44,12 @@ def run_pipeline(
         "random_seed": seed,
         "bin_size_s": bin_size,
         "max_units_requested": max_units,
+        "bootstrap_resamples": 1000,
+        "uncertainty": "95% class-stratified bootstrap CI from held-out predictions",
         "quality_filter": "ibl_quality_score=1, presence_ratio>=0.9, 0.1<=firing_rate<=100 Hz",
         "peak_choice_accuracy": float(choice_scores.max()),
-        "peak_choice_time_s": float(dataset.time[np.argmax(choice_scores)]),
+        "peak_choice_time_s": float(dataset.time[peak_choice_index]),
+        "peak_choice_ci95": [float(value) for value in peak_choice_ci],
         "peak_stimulus_accuracy": float(stimulus_scores.max()),
         "peak_prior_accuracy": float(prior_scores.max()),
         "figure": str(figure_path),

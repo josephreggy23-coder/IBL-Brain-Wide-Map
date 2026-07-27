@@ -35,6 +35,10 @@ def main() -> None:
         "decoding": {
             name: _rounded(scores) for name, scores in result.decoding.items()
         },
+        "decodingCi": {
+            name: _rounded(interval)
+            for name, interval in result.decoding_ci.items()
+        },
         "crossTemporalChoice": _rounded(result.cross_temporal_choice),
         "regionDecoding": {
             name: _rounded(scores) for name, scores in result.region_decoding.items()

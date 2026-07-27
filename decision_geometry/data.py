@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,6 +23,33 @@ from .config import (
     SESSION_ID,
     SUBJECT_ID,
 )
+
+CACHE_SCHEMA_VERSION = 1
+CACHE_METADATA_KEY = "__cache_metadata__"
+
+
+class CacheMismatchError(ValueError):
+    """Raised when a population cache was built for different inputs."""
+
+
+@dataclass(frozen=True)
+class PopulationCacheSpec:
+    """Inputs that determine the contents of a derived population cache."""
+
+    window: tuple[float, float]
+    bin_size: float
+    max_units: int | None
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "dandiset": DANDISET_ID,
+            "dandiset_version": DANDISET_VERSION,
+            "asset_id": ASSET_ID,
+            "window_s": list(self.window),
+            "bin_size_s": self.bin_size,
+            "max_units": self.max_units,
+        }
 
 
 @dataclass(frozen=True)
@@ -65,29 +93,61 @@ class PopulationDataset:
         if self.unit_ids.shape != (n_units,):
             raise ValueError("unit_ids must match the second rates dimension")
 
-    def save(self, path: Path) -> None:
+    def save(
+        self,
+        path: Path,
+        *,
+        cache_spec: PopulationCacheSpec | None = None,
+    ) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(
-            path,
-            rates=self.rates,
-            time=self.time,
-            choice=self.choice,
-            stimulus_side=self.stimulus_side,
-            prior_side=self.prior_side,
-            contrast=self.contrast,
-            rewarded=self.rewarded,
-            reaction_time=self.reaction_time,
-            trial_ids=self.trial_ids,
-            unit_ids=self.unit_ids,
-            unit_regions=self.unit_regions,
-            subject_id=np.array(self.subject_id),
-            session_id=np.array(self.session_id),
-        )
+        payload: dict[str, np.ndarray] = {
+            "rates": self.rates,
+            "time": self.time,
+            "choice": self.choice,
+            "stimulus_side": self.stimulus_side,
+            "prior_side": self.prior_side,
+            "contrast": self.contrast,
+            "rewarded": self.rewarded,
+            "reaction_time": self.reaction_time,
+            "trial_ids": self.trial_ids,
+            "unit_ids": self.unit_ids,
+            "unit_regions": self.unit_regions,
+            "subject_id": np.array(self.subject_id),
+            "session_id": np.array(self.session_id),
+        }
+        if cache_spec is not None:
+            payload[CACHE_METADATA_KEY] = np.array(
+                json.dumps(cache_spec.as_dict(), sort_keys=True)
+            )
+
+        temporary_path = path.with_suffix(f"{path.suffix}.tmp")
+        with temporary_path.open("wb") as stream:
+            np.savez_compressed(stream, **payload)
+        temporary_path.replace(path)
 
     @classmethod
-    def from_cache(cls, path: Path) -> "PopulationDataset":
+    def from_cache(
+        cls,
+        path: Path,
+        *,
+        expected_spec: PopulationCacheSpec | None = None,
+    ) -> "PopulationDataset":
         with np.load(path, allow_pickle=False) as data:
-            return cls(**{name: data[name] for name in data.files})
+            if expected_spec is not None:
+                if CACHE_METADATA_KEY not in data.files:
+                    raise CacheMismatchError("cache has no analysis metadata")
+                actual = json.loads(str(data[CACHE_METADATA_KEY].item()))
+                if actual != expected_spec.as_dict():
+                    raise CacheMismatchError("cache analysis parameters do not match")
+
+            values = {
+                name: data[name]
+                for name in data.files
+                if name != CACHE_METADATA_KEY
+            }
+            values["subject_id"] = str(values["subject_id"].item())
+            values["session_id"] = str(values["session_id"].item())
+            return cls(**values)
 
 
 def _read_column(table, name: str, dtype=None) -> np.ndarray:
@@ -127,7 +187,7 @@ def select_unit_indices(
     )
     selected = np.flatnonzero(mask)
     if max_units is not None and selected.size > max_units:
-        rank = np.lexsort((-presence_ratio[selected], -firing_rate[selected]))
+        rank = np.lexsort((-firing_rate[selected], -presence_ratio[selected]))
         selected = selected[rank[:max_units]]
     return np.sort(selected)
 
@@ -227,11 +287,19 @@ def load_population(
 ) -> PopulationDataset:
     """Load the compact cache or stream and derive it from the published NWB."""
     cache_path = Path(cache_path)
+    cache_spec = PopulationCacheSpec(
+        window=window,
+        bin_size=bin_size,
+        max_units=max_units,
+    )
     if cache_path.exists() and not force_stream:
-        return PopulationDataset.from_cache(cache_path)
+        try:
+            return PopulationDataset.from_cache(cache_path, expected_spec=cache_spec)
+        except CacheMismatchError:
+            pass
 
     dataset = _stream_population(window, bin_size, max_units)
-    dataset.save(cache_path)
+    dataset.save(cache_path, cache_spec=cache_spec)
     return dataset
 
 

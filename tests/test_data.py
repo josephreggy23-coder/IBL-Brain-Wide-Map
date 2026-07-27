@@ -2,7 +2,12 @@ from pathlib import Path
 
 import numpy as np
 
-from decision_geometry.data import PopulationDataset, select_unit_indices
+from decision_geometry.data import (
+    CacheMismatchError,
+    PopulationCacheSpec,
+    PopulationDataset,
+    select_unit_indices,
+)
 
 
 def test_quality_filter_selects_only_stable_units():
@@ -29,6 +34,18 @@ def test_quality_filter_rejects_non_positive_unit_limit():
         )
 
 
+def test_unit_limit_prioritizes_presence_ratio_then_firing_rate():
+    selected = select_unit_indices(
+        quality=np.ones(3),
+        presence_ratio=np.array([0.91, 0.99, 0.99]),
+        firing_rate=np.array([50.0, 2.0, 8.0]),
+        max_electrode=np.arange(3),
+        n_electrodes=3,
+        max_units=1,
+    )
+    np.testing.assert_array_equal(selected, [2])
+
+
 def test_population_cache_round_trip(tmp_path: Path):
     dataset = PopulationDataset(
         rates=np.ones((4, 3, 2), dtype=np.float32),
@@ -47,7 +64,33 @@ def test_population_cache_round_trip(tmp_path: Path):
     dataset.save(path)
     restored = PopulationDataset.from_cache(path)
     np.testing.assert_array_equal(restored.rates, dataset.rates)
-    assert str(restored.subject_id) == dataset.subject_id
+    assert restored.subject_id == dataset.subject_id
+
+
+def test_population_cache_rejects_different_analysis_parameters(tmp_path: Path):
+    dataset = PopulationDataset(
+        rates=np.ones((2, 1, 2), dtype=np.float32),
+        time=np.array([-0.1, 0.1]),
+        choice=np.array([0, 1]),
+        stimulus_side=np.array([0, 1]),
+        prior_side=np.array([0, 1]),
+        contrast=np.array([25.0, 100.0]),
+        rewarded=np.array([True, False]),
+        reaction_time=np.array([0.2, 0.3]),
+        trial_ids=np.arange(2),
+        unit_ids=np.arange(1),
+        unit_regions=np.array(["A"]),
+    )
+    path = tmp_path / "population.npz"
+    original_spec = PopulationCacheSpec(window=(-0.5, 1.0), bin_size=0.05, max_units=96)
+    dataset.save(path, cache_spec=original_spec)
+
+    restored = PopulationDataset.from_cache(path, expected_spec=original_spec)
+    np.testing.assert_array_equal(restored.rates, dataset.rates)
+
+    changed_spec = PopulationCacheSpec(window=(-0.5, 1.0), bin_size=0.1, max_units=96)
+    with np.testing.assert_raises_regex(CacheMismatchError, "parameters"):
+        PopulationDataset.from_cache(path, expected_spec=changed_spec)
 
 
 def test_population_dataset_rejects_misaligned_trial_metadata():

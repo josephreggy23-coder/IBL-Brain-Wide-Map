@@ -13,3 +13,7 @@ keystone/
 Latent-Period-Epileptogenesis-Assessment-Via-Markov-Modeling/
 neurocircuit_lab/
 profile-readme/
+
+# Linter / type-checker caches
+.ruff_cache/
+.mypy_cache/

@@ -17,3 +17,9 @@ profile-readme/
 # Linter / type-checker caches
 .ruff_cache/
 .mypy_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

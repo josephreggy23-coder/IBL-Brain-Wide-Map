@@ -198,6 +198,8 @@ decision-geometry
 pytest
 ```
 
+On macOS or Linux, activate the environment with `source .venv/bin/activate`.
+
 The first run creates `data/cache/session_population.npz`. The cache records its
 DANDI asset, published version, time window, bin size, and unit limit. Later runs
 reuse it only when all of those values match; a changed analysis request rebuilds

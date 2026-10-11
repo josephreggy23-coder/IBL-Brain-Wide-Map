@@ -262,8 +262,13 @@ Those are natural extensions rather than conclusions claimed here.
 
 ```text
 decision_geometry/
+  config.py      pinned dataset identifiers and analysis defaults
   data.py        remote NWB access, quality filtering, spike binning, cache
   analysis.py    PCA, time-resolved and cross-temporal decoding
+  dynamics.py    temporal dynamics of cross-temporal representations
+  selectivity.py single-unit selectivity measures
+  statistics.py  significance tests for time-resolved decoding
+  effect_size.py effect sizes for time-resolved decoding
   plotting.py    four-panel scientific result figure
   pipeline.py    end-to-end orchestration and summary export
   cli.py         command-line interface

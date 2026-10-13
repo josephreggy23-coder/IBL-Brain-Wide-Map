@@ -277,7 +277,8 @@ scripts/
 results/
   decision_geometry.png
   summary.json
-tests/           deterministic tests for filtering, cache integrity, and decoding
+tests/           deterministic tests for filtering, cache integrity, decoding,
+                 dynamics, selectivity, statistics, effect sizes, and the CLI
 web/             interactive explorer and downloadable analysis receipt
 ```
 

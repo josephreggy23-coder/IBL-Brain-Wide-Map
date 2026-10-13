@@ -18,5 +18,7 @@ The explorer data is generated from the repository root:
 .\.venv\Scripts\python scripts\export_web_payload.py
 ```
 
+On macOS or Linux, run `.venv/bin/python scripts/export_web_payload.py`.
+
 Run the site checks with `npm test`. The production build is emitted to
 `web/dist/` for Sites deployment.

@@ -7,6 +7,7 @@ authors:
 version: 0.1.0
 date-released: 2026-07-17
 license: MIT
+repository-code: "https://github.com/josephreggy23-coder/IBL-Brain-Wide-Map"
 preferred-citation:
   type: article
   title: "A brain-wide map of neural activity during complex behaviour"

@@ -30,3 +30,7 @@ Thumbs.db
 build/
 dist/
 htmlcov/
+
+# Interrupted cache writes and coverage reports
+*.tmp
+coverage.xml

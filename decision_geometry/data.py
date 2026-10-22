@@ -131,7 +131,7 @@ class PopulationDataset:
         path: Path,
         *,
         expected_spec: PopulationCacheSpec | None = None,
-    ) -> "PopulationDataset":
+    ) -> PopulationDataset:
         with np.load(path, allow_pickle=False) as data:
             if expected_spec is not None:
                 if CACHE_METADATA_KEY not in data.files:

@@ -218,6 +218,9 @@ decision-geometry --max-units 64 --bin-size 0.05
 # Record a different deterministic cross-validation split in the summary
 decision-geometry --seed 42
 
+# Keep the population tensor cache somewhere else
+decision-geometry --cache data/cache/alt_population.npz
+
 # Write the dashboard and summary to another directory
 decision-geometry --output-dir results/seed-42
 ```

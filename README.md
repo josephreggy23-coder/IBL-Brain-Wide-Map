@@ -217,6 +217,9 @@ decision-geometry --max-units 64 --bin-size 0.05
 
 # Record a different deterministic cross-validation split in the summary
 decision-geometry --seed 42
+
+# Write the dashboard and summary to another directory
+decision-geometry --output-dir results/seed-42
 ```
 
 The JSON summary records the selected `random_seed`, `bin_size_s`, and

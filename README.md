@@ -204,7 +204,8 @@ The first run creates `data/cache/session_population.npz`. The cache records its
 DANDI asset, published version, time window, bin size, and unit limit. Later runs
 reuse it only when all of those values match; a changed analysis request rebuilds
 the tensor instead of silently returning stale data. Results are written to the
-dashboard and `results/summary.json`.
+dashboard figure `results/decision_geometry.png` and to `results/summary.json`
+(or to `--output-dir`, if given).
 
 Useful options:
 

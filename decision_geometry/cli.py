@@ -26,11 +26,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Analyze decision geometry in a public IBL Neuropixels session."
     )
-    parser.add_argument("--cache", default="data/cache/session_population.npz")
-    parser.add_argument("--output-dir", default="results")
-    parser.add_argument("--force-stream", action="store_true")
-    parser.add_argument("--bin-size", type=positive_float, default=0.05)
-    parser.add_argument("--max-units", type=positive_int, default=96)
+    parser.add_argument("--cache", default="data/cache/session_population.npz",
+                        help="Path of the cached population tensor.")
+    parser.add_argument("--output-dir", default="results",
+                        help="Directory for the dashboard figure and summary.json.")
+    parser.add_argument("--force-stream", action="store_true",
+                        help="Re-read the NWB source and rebuild the cache.")
+    parser.add_argument("--bin-size", type=positive_float, default=0.05,
+                        help="Spike-count bin width in seconds.")
+    parser.add_argument("--max-units", type=positive_int, default=96,
+                        help="Maximum number of quality-filtered units to use.")
     parser.add_argument("--seed", type=int, default=7, help="Random seed for cross-validation splits.")
     return parser
 

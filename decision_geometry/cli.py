@@ -25,6 +25,7 @@ def positive_int(value: str) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the argument parser for the decision-geometry pipeline."""
     parser = argparse.ArgumentParser(
         description="Analyze decision geometry in a public IBL Neuropixels session."
     )
@@ -43,6 +44,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    """Run the pipeline with CLI arguments."""
     arguments = build_parser().parse_args()
     summary = run_pipeline(
         cache_path=arguments.cache,

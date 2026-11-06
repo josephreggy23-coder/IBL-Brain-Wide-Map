@@ -9,6 +9,7 @@ from .pipeline import run_pipeline
 
 
 def positive_float(value: str) -> float:
+    """Parse a strictly positive float for argparse."""
     parsed = float(value)
     if parsed <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
@@ -16,6 +17,7 @@ def positive_float(value: str) -> float:
 
 
 def positive_int(value: str) -> int:
+    """Parse an integer of at least one for argparse."""
     parsed = int(value)
     if parsed < 1:
         raise argparse.ArgumentTypeError("must be at least one")

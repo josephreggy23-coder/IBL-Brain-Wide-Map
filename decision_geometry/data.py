@@ -41,6 +41,7 @@ class PopulationCacheSpec:
     max_units: int | None
 
     def as_dict(self) -> dict[str, object]:
+        """Return the spec as a JSON-ready dict used to validate caches."""
         return {
             "schema_version": CACHE_SCHEMA_VERSION,
             "dandiset": DANDISET_ID,
@@ -99,6 +100,7 @@ class PopulationDataset:
         *,
         cache_spec: PopulationCacheSpec | None = None,
     ) -> None:
+        """Atomically write the dataset to a compressed .npz cache."""
         path.parent.mkdir(parents=True, exist_ok=True)
         payload: dict[str, np.ndarray] = {
             "rates": self.rates,

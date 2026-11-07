@@ -17,6 +17,7 @@ from .data import PopulationDataset
 
 @dataclass(frozen=True)
 class AnalysisResult:
+    """PCA trajectories plus overall, cross-temporal and per-region decoding."""
     pca_trajectories: dict[str, np.ndarray]
     explained_variance: np.ndarray
     decoding: dict[str, np.ndarray]
@@ -27,6 +28,7 @@ class AnalysisResult:
 
 @dataclass(frozen=True)
 class DecodingEstimate:
+    """Decoding scores per time bin with confidence bounds."""
     scores: np.ndarray
     ci_low: np.ndarray
     ci_high: np.ndarray

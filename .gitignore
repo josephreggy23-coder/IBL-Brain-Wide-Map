@@ -34,3 +34,8 @@ htmlcov/
 # Interrupted cache writes and coverage reports
 *.tmp
 coverage.xml
+
+# Local environment, logs, and editor swap files
+.env
+*.log
+*.swp

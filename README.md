@@ -287,6 +287,9 @@ results/
 tests/           deterministic tests for filtering, cache integrity, decoding,
                  dynamics, selectivity, statistics, effect sizes, and the CLI
 web/             interactive explorer and downloadable analysis receipt
+pyproject.toml   package metadata and dependencies
+CITATION.cff     citation metadata
+LICENSE          MIT license
 ```
 
 This repository is intentionally scoped to Decision Geometry. Other experiments,
